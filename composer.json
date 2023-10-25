@@ -1,0 +1,14 @@
+{
+    "name": "jhuddle/framework",
+    "description": "Ultra-minimal PHP framework",
+    "homepage": "https://github.com/jhuddle/framework",
+    "license": "MIT-0",
+    "require": {
+        "php": ">=8.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Framework\\": "src/"
+        }
+    }
+}
