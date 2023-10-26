@@ -101,7 +101,7 @@ Let's start at the very beginning; a very good place to start. From your project
   );
 
   app->route->get('/favorite-things',
-    fn ($name = 'world') => print app->view('layout', [
+    fn () => print app->view('layout', [
       'title' => "A few of my favorite things",
       'content' => app->view('partials/list', [
         'items' => [
@@ -115,9 +115,29 @@ Let's start at the very beginning; a very good place to start. From your project
     ])
   );
 
+  app->route->post('/apply-now',
+    function () {
+      $data = json_decode(app->input);
+      $name = htmlspecialchars(@$data->name);
+      $role = htmlspecialchars(@$data->role);
+      if ($name && $role) {
+        print app->view('layout', [
+          'title' => "Thank you, $name",
+          'content' => "Your application for the role of $role is being considered."
+        ]);
+      } else {
+        http_response_code(400);  // Bad Request
+        print app->view('layout', [
+          'title' => "Sorry",
+          'content' => "There was a problem with your application; please try again."
+        ]);
+      }
+    }
+  );
+
   // Fallback:
 
-  http_response_code(404);
+  http_response_code(404);  // Not Found
   print '<h1>404 Not Found :(</h1>';
   ```
 
@@ -139,12 +159,17 @@ Let's start at the very beginning; a very good place to start. From your project
   /favorite-things
   ```
 
-Note that in each case, the route handling method `app->route->get()` (or `post()`, `put()`, `delete()`, whatever you need) takes two arguments:
+  Or with [curl](https://curl.se/):
+  ```sh
+  curl localhost:8000/apply-now -d '{"name": "Maria", "role": "Governess"}'
+  ```
 
-- The route pattern, which may contain optional/optionally-typed parameters in angle brackets
-- The callback function, with named parameters that correspond to those in the route pattern
+Note that in each case, the route handling methods `get()` and `post()` - or `put()`, `patch()`, `delete()`, whatever you need - take two arguments:
 
-Hopefully you can already see how this is gonna go...
+- The route pattern, which may contain parameters in angle brackets: these can be made optional with `?`, and/or provided with the name of a PHP scalar type as a syntax hint (though type coercion/URL decoding is not performed automatically, for security reasons)
+- The callback function, with named parameters that correspond to those in the route pattern, where the app's `input` property may be used to inspect the request body
+
+Hopefully you might already have an idea how this works...
 
 **Yeah, looks simple enough - what's this `'view' => dir('../templates')` all about though?**
 
@@ -277,7 +302,7 @@ $nothing = $query->fetchAll(\PDO::FETCH_OBJ);
 
 And there's also [`session`](src/Session.php), a very simple wrapper for the built-in PHP session management functions - by default, the framework starts a session unless `false` is passed as the second argument to the `App` constructor.
 
-**OK, cool, got it. Is that everything?**
+**OK, sounds good - is that everything?**
 
 Yes and no! We've now touched each of the six small classes that make up this framework, but there's a lot more you can do with them...
 
@@ -412,4 +437,4 @@ And there's probably a bunch of other possible patterns for a bunch of other use
 
 **Awesome, thank you! How can I contribute?**
 
-The best contribution you can make to this framework is simply to use it, and report any issues... and if you build something cool with it, please let me know by adding a link to your GitHub repo in a pull request to the [Projects](PROJECTS.md) file! It'd be cool to see what you come up with. 🙂
+The best contribution you can make to this framework is simply to use it, and report any issues... and if you build something cool with it, please let me know by adding a link to your GitHub repo in a pull request to the [Projects](PROJECTS.md) file! It'd be great to see what you come up with. 🙂

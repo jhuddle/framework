@@ -4,17 +4,14 @@ namespace Framework;
 
 class Route {
 
-	protected string|null $prefix = null;
+	public string|null $prefix = null;
 
 	public function prefix(
 		string $prefix = ""
 	): self
 	{
-		if (!str_starts_with($prefix, '/')) {
-			$prefix = '/'. $prefix;
-		}
 		$new = new self();
-		$new->prefix = $this->prefix . $prefix;
+		$new->prefix = $this->prefix .'/'. trim($prefix, '/');
 		return $new;
 	}
 
@@ -50,7 +47,12 @@ class Route {
 
 					case 'float':
 					case 'double':
-						$pattern = '-?(?:\d*\.)?\d+(?:[Ee]-?\d+)?';
+						$pattern = '-?\d*\.?\d+(?:[Ee]-?\d+)?';
+						break;
+
+					case 'bool':
+					case 'boolean':
+						$pattern = '[Tt][Rr][Uu][Ee]|[Ff][Aa][Ll][Ss][Ee]';
 						break;
 
 					case 'binary':
@@ -70,7 +72,7 @@ class Route {
 			},
 			preg_quote($this->prefix . $route, '~')
 		);
-		$route_regex = '~^'. $route_pattern .'/?$~';
+		$route_regex = '~^'. $route_pattern .'$~';
 
 		if (preg_match($route_regex, $url_path, $values, PREG_UNMATCHED_AS_NULL)) {
 			array_shift($values);  // i.e. remove $values[0] (whole pattern)

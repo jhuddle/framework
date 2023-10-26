@@ -4,8 +4,8 @@ namespace Framework;
 
 class Resource {
 
-	protected string $folder;
-	protected string $suffix;
+	public string $folder;
+	public string $suffix;
 
 	public function __construct(
 		string $folder = '.',
