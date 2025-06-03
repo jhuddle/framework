@@ -21,8 +21,10 @@ class Resource {
 		array $vars = []
 	): object
 	{
-		if (!str_ends_with($file, $this->suffix)) {
-			$file = $this->folder .'/'. $file . $this->suffix;
+		$file = $this->folder .'/'. $file;
+
+		if (!preg_match('~\.\w+$~', $file)) {
+			$file .= $this->suffix;
 		}
 
 		return new class ($file, $vars) {

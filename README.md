@@ -167,15 +167,15 @@ Let's start at the very beginning; a very good place to start. From your project
 Note that in each case, the route handling methods `get()` and `post()` - or `put()`, `patch()`, `delete()`, whatever you need - take two arguments:
 
 - The route pattern, which may contain parameters in angle brackets: these can be made optional with `?`, and/or provided with the name of a PHP scalar type as a syntax hint (though type coercion/URL decoding is not performed automatically, for security reasons)
-- The callback function, with named parameters that correspond to those in the route pattern, where the app's `input` property may be used to inspect the request body
+- The callback function, with named parameters that correspond to those in the route pattern, where the app's `input` property may be used to inspect the HTTP request body
 
-Hopefully you might already have an idea how this works...
+Hopefully you might already have an idea how this works by now...
 
 **Yeah, looks simple enough - what's this `'view' => dir('../templates')` all about though?**
 
-This tells your [`App`](src/App.php) instance where to find the PHP templates for generating your site's HTML; the framework isn't expecting any particular folder structure, so you need to tell it which base folder to start looking in. In fact, the array key doesn't even have to be named `view`: you could call it `template` instead, or `html`, or whatever you prefer! And you can even have multiple array keys, each referring to a different base folder.
+This tells your [`App`](src/App.php) instance where to find the PHP templates for generating your site's HTML; the framework isn't expecting any particular folder structure, so you need to tell it which base folder to look in. In fact, the array key doesn't even have to be named `view`: you could call it `template` instead, or `html`, or whatever you prefer! And you can even have multiple array keys, each referring to a different base folder.
 
-Whichever names you choose will be used to create methods that create [classes](src/Resource.php) that `include` the file suggested by the path passed to it, and which `extract` an optional array of variable names and values for use within that file, e.g.:
+Whichever names you choose will be used to create new callable [`Resource`](src/Resource.php) properties on the app instance: when invoked with a file path (relative to the base folder), these create anonymous class objects which `include` the file whenever used as a string, and which `extract` an optional array of variable names and values for use within that file's context, e.g.:
 
 ```php
 <?php
@@ -189,18 +189,18 @@ print app->layout('song/lyrics', [
   'title' => "The Lonely Goatherd",
   'content' => implode("<br>", [
     "High on a hill was a lonely goatherd,",
-    app->partial('yodel'),
+    app->partial('yodel.php'),
     "Loud was the voice of the lonely goatherd,",
-    app->partial('yodel'),
+    app->partial('yodel.php', ['short' => true]),
     "Folks in a town that was quite remote heard",
-    app->partial('yodel'),
+    app->partial('yodel'),  // adds `.php` if no suffix given
     "Lusty and clear from the goatherd's throat, heard",
-    app->partial('yodel'),
+    app->partial('yodel', ['short' => true]),
   ]),
 ]);
 ```
 
-But that's not all! Besides base folders wrapped in `dir()`, you can add/overwrite anything you like to your app instance, at any time:
+But that's not all! Besides base folders wrapped in `dir()`, you can add/overwrite anything you like to your `App` instance, at any time, either during instantiation or by calling the `use()` method:
 
 ```php
 <?php
@@ -306,7 +306,7 @@ And there's also [`session`](src/Session.php), a very simple wrapper for the bui
 
 Yes and no! We've now touched each of the six small classes that make up this framework, but there's a lot more you can do with them...
 
-- The classes you create with `dir()` can be stored in variables and extended with the `use()` method, just like the app itself:
+- The objects you create via `dir()` can be stored in variables and extended with the `use()` method, just like the app itself:
 
   `templates/mantra.php`
   ```html
@@ -331,7 +331,7 @@ Yes and no! We've now touched each of the six small classes that make up this fr
   );
   ```
 
-- These classes are also callable! You can use this fact to simplify your route callbacks:
+- These objects are also callable! You can use this fact to simplify your route callbacks:
 
   `templates/hills.php`
   ```html
@@ -351,7 +351,7 @@ Yes and no! We've now touched each of the six small classes that make up this fr
   );
   ```
 
-- Templates can also create and call these classes:
+- Templates can also create and call these objects:
 
   `templates/layout.php`
   ```html
@@ -437,4 +437,4 @@ And there's probably a bunch of other possible patterns for a bunch of other use
 
 **Awesome, thank you! How can I contribute?**
 
-The best contribution you can make to this framework is simply to use it, and report any issues... and if you build something cool with it, please let me know by adding a link to your GitHub repo in a pull request to the [Projects](PROJECTS.md) file! It'd be great to see what you come up with. 🙂
+The best contribution you can make to this framework is simply to use it, and report any issues... and if you build something cool with it, please let me know by adding a link to your GitHub repo/project website in a pull request to the [Projects](PROJECTS.md) file! It'd be great to see what you come up with. 🙂
